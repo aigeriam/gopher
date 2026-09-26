@@ -18,6 +18,7 @@ type application struct {
 type config struct {
 	addr string
 	db   dbConfig
+	env  string
 }
 type dbConfig struct {
 	addr         string
@@ -32,9 +33,20 @@ func (app *application) mount() *chi.Mux {
 	r.Use(middleware.ClientIPFromRemoteAddr) // pick one ClientIPFrom* based on your infra, see below
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
+	r.Route("/v1", func(r chi.Router) {
+		r.Get("/health", app.healthChecker)
+		r.Route("/posts", func(r chi.Router) {
+			r.Post("/", app.createPostHanlder)
+			r.Route("/{postID}", func(r chi.Router) {
+				r.Get("/", app.getPostHandler)
+			})
+		})
+	})
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
 	})
+	r.Get("/health", app.healthChecker)
 	return r
 }
 func (app *application) run(mux *chi.Mux) error {

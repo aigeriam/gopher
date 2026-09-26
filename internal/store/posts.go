@@ -26,9 +26,9 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at
 	`
 	err := s.db.QueryRowContext(
-		ctx, query, post.Content, post.Title, post.Tags, pq.Array(post.Tags),
+		ctx, query, post.Content, post.Title, post.UserId, pq.Array(post.Tags),
 	).Scan(
-		&post.ID,
+		&post.ID, ///when creating post they will be added to post sent
 		&post.CreatedAt,
 		&post.UpdatedAt,
 	)
@@ -36,4 +36,9 @@ func (s *PostStore) Create(ctx context.Context, post *Post) error {
 		return err
 	}
 	return nil
+}
+func (s *PostStore) GetByID(ctx context.Context, postID string) (Post, error) {
+	query:=`
+	SElECT FROM posts WHERE `
+	query:=
 }

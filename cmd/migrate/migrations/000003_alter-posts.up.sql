@@ -1,0 +1,5 @@
+ALTER TABLE posts
+	ADD COLUMN tags TEXT[] NOT NULL DEFAULT '{}',
+	ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	ADD CONSTRAINT posts_user_id_fkey
+		FOREIGN KEY (user_id) REFERENCES users (id);
